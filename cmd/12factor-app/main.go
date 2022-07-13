@@ -9,12 +9,15 @@ import (
 	"syscall"
 	"time"
 
-	log "github.com/sirupsen/logrus"
 	"github.com/gorilla/mux"
+	"github.com/sirupsen/logrus"
 )
 
 func main() {
-	log.Info("Hello world")
+	log := logrus.New()
+	log.SetOutput(os.Stdout)
+
+	log.Info("Start the app...")
 
 	port := os.Getenv("PORT")
 	if len(port) == 0 {
@@ -30,7 +33,7 @@ func main() {
 	})
 
 	serv := http.Server{
-		Addr: net.JoinHostPort("", port),
+		Addr:    net.JoinHostPort("", port),
 		Handler: router,
 	}
 
@@ -41,8 +44,18 @@ func main() {
 
 	<-interrupt
 
-	timeout, cancelFunc := context.WithTimeout(context.Background(), 5 * time.Second)
+
+	log.Info("Stopping app...")
+
+
+	timeout, cancelFunc := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancelFunc()
 
-	serv.Shutdown(timeout)	
+	err := serv.Shutdown(timeout)
+	if err != nil {
+		log.Error("Error when shutdown app: %v", err)
+	}
+
+
+	log.Info("The app stopped")
 }
