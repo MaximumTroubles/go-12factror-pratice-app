@@ -1,1 +1,1 @@
-web: bin/go-12factror-pratice-app
+web: bin/12factor-appcl
