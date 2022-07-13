@@ -1,1 +1,1 @@
-web: bin/12factor-appcl
+web: bin/12factor-app
