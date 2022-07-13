@@ -8,3 +8,7 @@ go mod tidy
 
 Log package Logrus:
 https://github.com/sirupsen/logrus
+
+
+Heroku buildpack for go:
+https://github.com/heroku/heroku-buildpack-go
