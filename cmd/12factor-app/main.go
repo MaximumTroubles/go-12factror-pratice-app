@@ -1,10 +1,16 @@
 package main
 
 import (
+	"context"
+	"net"
 	"net/http"
 	"os"
+	"os/signal"
+	"syscall"
+	"time"
 
 	log "github.com/sirupsen/logrus"
+	"github.com/gorilla/mux"
 )
 
 func main() {
@@ -17,8 +23,26 @@ func main() {
 
 	// DB_URL heroku key if we want to use database.
 
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+	router := mux.NewRouter()
+
+	router.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 	})
-	http.ListenAndServe(":"+port, nil)
+
+	serv := http.Server{
+		Addr: net.JoinHostPort("", port),
+		Handler: router,
+	}
+
+	go serv.ListenAndServe()
+
+	interrupt := make(chan os.Signal, 1)
+	signal.Notify(interrupt, os.Interrupt, syscall.SIGTERM)
+
+	<-interrupt
+
+	timeout, cancelFunc := context.WithTimeout(context.Background(), 5 * time.Second)
+	defer cancelFunc()
+
+	serv.Shutdown(timeout)	
 }
